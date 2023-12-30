@@ -7,6 +7,19 @@ export default defineConfig({
   optimizeDeps: {
   },
   server:{
-    host:'0.0.0.0'
+    host:'0.0.0.0',
+    proxy: {
+      "/api": {
+        // 选项写法
+        target: "http://127.0.0.1:9080",
+        changeOrigin: true,
+        rewrite: (path) => {
+          path = path.replace(/^\/api/, "");
+          // 进行调试输出
+          console.log('vite proxy url: ',path);
+          return path;
+        },
+      },
+    }
   }
 })

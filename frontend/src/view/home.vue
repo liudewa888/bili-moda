@@ -1,7 +1,8 @@
 <template>
   <el-row class="web-main">
-    <el-col>
+    <el-col class="head">
       <h2 style="margin-bottom: 10px;">B站莫大视频收集汇总学习</h2>
+      <el-button type="primary" @click="tableOperateHandler('add')">添加</el-button>
     </el-col>
     <el-table :data="state.tableData" style="width: 100%;" size="small"
       :default-sort="{ prop: 'date', order: 'descending' }" :scrollbar-always-on="true">
@@ -10,7 +11,7 @@
       <el-table-column prop="date" label="日期" width="90" sortable fixed />
       <el-table-column prop="type" label="类型" />
       <el-table-column prop="summary" label="概要" width="330" :show-overflow-tooltip="true" />
-      <el-table-column prop="start" label="干货星级" sortable align="center" />
+      <el-table-column prop="star" label="干货星级" sortable align="center" />
       <el-table-column prop="isComplete" label="完整" align="center" />
       <el-table-column prop="multiple" label="多集" align="center" />
       <el-table-column label="up视频">
@@ -29,6 +30,16 @@
         <template #default="scope">
           <el-button type="primary" link size="small" @click="jumpUrl(scope.row.audio)"
             v-if="scope.row.audio">地址</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="120">
+        <template #default="scope">
+          <el-button link type="primary" size="small" @click.prevent="tableOperateHandler('edit', scope.row)">
+            编辑
+          </el-button>
+          <el-button link type="primary" size="small" @click.prevent="tableOperateHandler('delete', scope.row)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -51,19 +62,75 @@
         </li>
       </ul>
     </div>
+    <el-dialog v-model="dialogShow" :title="tableOperateFlag == 'add' ? '添加' : '编辑'" width="60%" :show-close="false"
+      @open="dialogOpen(dialogFormRef)">
+      <el-form :model="catalogFormData" ref="dialogFormRef" label-width="120px">
+        <el-form-item label="主题" prop="theme">
+          <el-input v-model="catalogFormData.theme" />
+        </el-form-item>
+        <el-form-item label="日期" prop="date">
+          <el-input v-model="catalogFormData.date" />
+        </el-form-item>
+        <el-form-item label="类型">
+          <el-input v-model="catalogFormData.type" />
+        </el-form-item>
+        <el-form-item label="概要">
+          <el-input v-model="catalogFormData.summary" />
+        </el-form-item>
+        <el-form-item label="干货星级">
+          <el-input v-model="catalogFormData.star" />
+        </el-form-item>
+        <el-form-item label="是否完整">
+          <el-input v-model="catalogFormData.isComplete" />
+        </el-form-item>
+        <el-form-item label="多集">
+          <el-input v-model="catalogFormData.multiple" />
+        </el-form-item>
+        <el-form-item label="up视频地址">
+          <el-input v-model="catalogFormData.upVideo" />
+        </el-form-item>
+        <el-form-item label="其它up视频地址">
+          <el-input v-model="catalogFormData.otherUpVideo" />
+        </el-form-item>
+        <el-form-item label="音频地址">
+          <el-input v-model="catalogFormData.audio" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button class="mr-4" @click="dialogShow = false">取消</el-button>
+        <el-button type="primary" @click="formSubmit">
+          保存
+        </el-button>
+      </template>
+    </el-dialog>
   </el-row>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-
-const tableData = window.__tableData || []
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi } from '../api/home'
 const ups = [
   {
     name: 'Tobea-better-man',
     home: 'https://space.bilibili.com/291104144'
   }
 ]
+const dialogFormRef = ref()
+const dialogShow = ref(false)
+const tableOperateFlag = ref('add')
+const catalogFormData = reactive({
+  date: null,
+  theme: null,
+  type: 1,
+  summary: null,
+  star: 0,
+  isComplete: 1,
+  multiple: 0,
+  upVideo: null,
+  otherUpVideo: null,
+  audio: null
+})
 const query = reactive({
   pageIndex: 1,
   pageSizes: 10,
@@ -72,18 +139,84 @@ const query = reactive({
 const state = reactive({
   tableData: []
 })
-const len = tableData.length
-tableData.forEach((item, index) => {
-  item.index = len - index
-})
-query.pageTotal = len
-state.tableData = tableData.slice((query.pageIndex - 1) * query.pageSizes, query.pageIndex * query.pageSizes)
+const formSubmitHandler = (flag) => {
+  ElMessage({
+    message: flag + '成功!',
+    type: 'success',
+  })
+  dialogShow.value = false
+  getCatalogList()
+}
+const formSubmit = () => {
+  if (tableOperateFlag === 'add') {
+    addCatalogApi(catalogFormData).then(() => {
+      formSubmitHandler('添加')
+    })
+  } else if (tableOperateFlag === 'edit') {
+    editCatalogApi(catalogFormData).then(() => {
+      formSubmitHandler('编辑')
+    })
+  }
+}
+const resetForm = (formRef) => {
+  if (!formRef) return;
+  formRef.resetFields()
+}
+const dialogOpen = (formRef) => {
+  if (tableOperateFlag.value === 'add') {
+    resetForm(formRef)
+  }
+}
+const tableOperateHandler = (flag, row) => {
+  if (flag === 'edit') {
+    Object.keys(row).forEach(key => {
+      catalogFormData[key] = row[key]
+    })
+
+  } else if (flag === 'delete') {
+    ElMessageBox.confirm(
+      '请确认是否要删除?',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+      .then(() => {
+        deleteCatalogApi({ id: row.id }).then(() => {
+          formSubmitHandler('删除')
+        })
+      })
+      .catch(() => {
+      })
+    return
+  }
+  tableOperateFlag.value = flag
+  dialogShow.value = true
+}
 const jumpUrl = link => {
   window.open(link, '_blank')
 }
 const paginationChange = () => {
   state.tableData = tableData.slice((query.pageIndex - 1) * query.pageSizes, query.pageIndex * query.pageSizes)
 }
+const getCatalogList = () => {
+  getCatalogListApi().then(({ data }) => {
+    const tableData = data
+    const len = tableData.length
+    tableData.forEach((item, index) => {
+      item.index = len - index
+    })
+    query.pageTotal = len
+    state.tableData = tableData.slice((query.pageIndex - 1) * query.pageSizes, query.pageIndex * query.pageSizes)
+  })
+}
+const init = () => {
+  getCatalogList()
+}
+onMounted(() => {
+  init()
+})
 </script>
 
 <style scoped lang="less">
@@ -122,10 +255,19 @@ const paginationChange = () => {
     margin-top: 4px;
   }
 
+  .mr-4 {
+    margin-right: 4px;
+  }
+
   .footer {
     position: absolute;
     bottom: 0.5rem;
     left: 0.5rem;
+  }
+
+  .head {
+    display: flex;
+    justify-content: space-between;
   }
 }
 </style>
