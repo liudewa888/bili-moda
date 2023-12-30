@@ -6,10 +6,10 @@
     <el-table :data="state.tableData" style="width: 100%;" size="small"
       :default-sort="{ prop: 'date', order: 'descending' }" :scrollbar-always-on="true">
       <el-table-column prop="index" label="序号" width="50" fixed />
-      <el-table-column prop="theme" label="主题" width="80" fixed />
-      <el-table-column prop="date" label="日期" width="100" sortable fixed />
+      <el-table-column prop="theme" label="主题" width="112" :show-overflow-tooltip="true" fixed />
+      <el-table-column prop="date" label="日期" width="90" sortable fixed />
       <el-table-column prop="type" label="类型" />
-      <el-table-column prop="summary" label="概要" width="480" :show-overflow-tooltip="true" />
+      <el-table-column prop="summary" label="概要" width="330" :show-overflow-tooltip="true" />
       <el-table-column prop="start" label="干货星级" sortable align="center" />
       <el-table-column prop="isComplete" label="完整" align="center" />
       <el-table-column prop="multiple" label="多集" align="center" />
