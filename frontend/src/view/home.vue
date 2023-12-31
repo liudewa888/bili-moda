@@ -32,9 +32,11 @@
       </el-table-column>
       <el-table-column label="up视频">
         <template #default="scope">
-          <el-button type="primary" link size="small" v-for="(item, index) in scope.row.upVideo.split(',')"
-            @click="jumpUrl(item)" v-if="scope.row.upVideo.length">地址{{ scope.row.multiple > 0 ? index + 1 : ''
-            }}</el-button>
+          <template v-if="scope.row.upVideo">
+            <el-button type="primary" link size="small" v-for="(item, index) in scope.row.upVideo?.split(',')"
+              @click="jumpUrl(item)">地址{{ scope.row.multiple > 0 ? index + 1 : ''
+              }}</el-button>
+          </template>
         </template>
       </el-table-column>
       <el-table-column label="其它up视频" align="center">
@@ -72,8 +74,8 @@
         <li>3. 主要是概要比较难总结,大家看过视频多多进行总结并提供</li>
         <li>4. 欢迎大家在B站评论区按照格式进行补充和修改</li>
         <li>5. 感谢有过录屏的up主
-          <el-link class="mr-4" type="primary" size="small" :href="item.home" target="_blank" :underline="false" v-for="item in ups"
-            style="font-size: 12px;">{{ item.name
+          <el-link class="mr-4" type="primary" size="small" :href="item.home" target="_blank" :underline="false"
+            v-for="item in ups" style="font-size: 12px;">{{ item.name
             }}</el-link>
           大家多多给一键三连
         </li>
@@ -194,7 +196,7 @@ const catalogFormData = reactive({
 })
 const query = reactive({
   pageIndex: 1,
-  pageSizes: 10,
+  pageSize: 10,
   pageTotal: 10
 })
 const state = reactive({
@@ -266,7 +268,7 @@ const jumpUrl = link => {
   window.open(link, '_blank')
 }
 const paginationChange = () => {
-  state.tableData = state.tableDataTemp.slice((query.pageIndex - 1) * query.pageSizes, query.pageIndex * query.pageSizes)
+  state.tableData = state.tableDataTemp.slice((query.pageIndex - 1) * query.pageSize, query.pageIndex * query.pageSize)
 }
 const getCatalogList = () => {
   getCatalogListApi().then(({ data }) => {
@@ -282,7 +284,7 @@ const getCatalogList = () => {
     })
     query.pageTotal = len
     state.tableDataTemp = tableData
-    state.tableData = tableData.slice((query.pageIndex - 1) * query.pageSizes, query.pageIndex * query.pageSizes)
+    state.tableData = tableData.slice((query.pageIndex - 1) * query.pageSize, query.pageIndex * query.pageSize)
   })
 }
 const init = () => {
@@ -353,7 +355,7 @@ onMounted(() => {
 }
 </style>
 
-<style>
+<style lang="less">
 .el-dialog {
   .el-dialog__header {
     padding: 0;

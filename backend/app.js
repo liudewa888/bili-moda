@@ -4,6 +4,16 @@ const jwt = require("jsonwebtoken");
 const compression = require("compression");
 const app = express();
 
+app.use((req, res, next) => {
+  if (req.url.includes("/moda")) {
+    req.url = req.url.replace("/moda", "");
+  }
+  if (req.url.includes("/api")) {
+    req.url = req.url.replace("/api", "");
+  }
+  next();
+});
+app.use(express.static("./dist"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -54,7 +64,7 @@ function authenticateToken(req, res, next) {
   pool.getConnection((err, connection) => {
     const sql = `select token_key from users WHERE token = '${token}'`;
     connection.query(sql, (err, result) => {
-      if (result) {
+      if (!err && result.length) {
         const key = result[0].token_key;
         jwt.verify(token, key, (err, decoded) => {
           if (!err) {

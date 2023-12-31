@@ -21,6 +21,17 @@ export default defineConfig({
           return path;
         },
       },
+      // "/api": {
+      //   // 选项写法
+      //   target: "http://www.yztpsg.cn/moda/",
+      //   changeOrigin: true,
+      //   rewrite: (path) => {
+      //     path = path.replace(/^\/api/, "");
+      //     // 进行调试输出
+      //     console.log('vite proxy url: ',path);
+      //     return path;
+      //   },
+      // },
     }
   }
 })
