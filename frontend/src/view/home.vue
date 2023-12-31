@@ -135,7 +135,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElTable,ElTableColumn,ElPagination,ElLink,ElButton, ElRow, ElCol, ElOption, ElSelect, ElInput, ElFormItem, ElForm, ElDialog,ElMessage, ElMessageBox  } from 'element-plus'
 import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi } from '../api/home'
 const ups = [
   {
@@ -332,6 +332,7 @@ onMounted(() => {
   .pagination {
     display: flex;
     justify-content: end;
+    z-index: 1;
   }
 
   .mt-4 {

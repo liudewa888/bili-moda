@@ -1,10 +1,13 @@
+import { defineAsyncComponent } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
-import Home from "../view/home.vue";
-import Login from "../view/login.vue";
+
+const _import = (path) => {
+  return defineAsyncComponent(() => import(`../view/${path}.vue`));
+};
 
 const routes = [
-  { path: "/", component: Home },
-  { path: "/admin/login", component: Login },
+  { path: "/", component: _import("home") },
+  { path: "/admin/login", component: _import("login") },
 ];
 
 const router = createRouter({

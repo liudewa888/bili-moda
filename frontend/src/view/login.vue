@@ -1,7 +1,7 @@
 <template>
-  <el-row class="login">
-    <el-col :span="6">
-      <el-form ref="loginFormRef" :model="loginFormData" :rules="rules" label-width="100px">
+  <el-row class="main">
+    <el-col class="login">
+      <el-form class="form" ref="loginFormRef" :model="loginFormData" :rules="rules" label-width="100px">
         <el-form-item label="账号" prop="uname">
           <el-input v-model="loginFormData.uname" autocomplete="off" />
         </el-form-item>
@@ -19,9 +19,8 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus';
+import { ElButton, ElRow, ElCol, ElInput, ElFormItem, ElForm, ElMessage } from 'element-plus'
 import { toLoginApi } from "../api/login";
-
 const router = useRouter()
 const rules = reactive({
   uname: [
@@ -67,10 +66,19 @@ const submitForm = (formRef) => {
 
 </script>
 <style scoped lang="less">
+.main {
+  background-color: #e0e0c4;
+  min-height: 100vh;
+}
+
 .login {
   display: flex;
   justify-content: center;
   margin-top: 200px;
+}
+
+.form {
+  width: 300px;
 }
 
 :deep(.el-form-item__content) {

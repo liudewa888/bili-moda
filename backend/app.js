@@ -145,7 +145,6 @@ app.get("/catalog/list", (req, res) => {
     if (err) {
       return res.send(responseFormat(502, [], "服务端故障"));
     }
-    const reqId = req.body.id;
     const sql = "SELECT * FROM table_list";
     connection.query(sql, (err, result) => {
       if (!err) {
