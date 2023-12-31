@@ -23,7 +23,7 @@ function transform(obj, filter = []) {
   const res = [];
   for (let key in obj) {
     if (filter.includes(key)) continue;
-    res.push(`${key}=${obj[key]}`);
+    res.push(`${key}='${obj[key]}'`);
   }
   return res.join();
 }
@@ -47,9 +47,9 @@ function generateAccessToken(user, key) {
 // token验证
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = authHeader;
   if (!token) {
-    return res.send(responseFormat(401, null, "需要登录,才能操作"));
+    return res.send(responseFormat(409, null, "需要登录,才能操作"));
   }
   pool.getConnection((err, connection) => {
     const sql = `select token_key from users WHERE token = '${token}'`;
@@ -100,7 +100,7 @@ app.post("/admin/login", (req, res) => {
             }
           });
         } else {
-          res.send(responseFormat(401, [], "用户名或密码错误"));
+          res.send(responseFormat(409, [], "用户名或密码错误"));
         }
       } else {
         res.send(responseFormat(409, [], err.sqlMessage));
@@ -132,6 +132,9 @@ app.get("/catalog/delete", authenticateToken, (req, res) => {
 // 莫大目录-获取
 app.get("/catalog/list", (req, res) => {
   pool.getConnection((err, connection) => {
+    if (err) {
+      return res.send(responseFormat(502, [], "服务端故障"));
+    }
     const reqId = req.body.id;
     const sql = "SELECT * FROM table_list";
     connection.query(sql, (err, result) => {
@@ -148,7 +151,13 @@ app.get("/catalog/list", (req, res) => {
 // 莫大目录-新增
 app.post("/catalog/add", authenticateToken, (req, res) => {
   pool.getConnection((err, connection) => {
-    const data = req.body;
+    const temp = req.body;
+    const data = {};
+    for (let key in temp) {
+      if (temp[key] != null) {
+        data[key] = `'${temp[key]}'`;
+      }
+    }
     const sql = `INSERT INTO table_list (${Object.keys(
       data
     ).join()}) VALUES (${Object.values(data).join()})`;
@@ -167,8 +176,8 @@ app.post("/catalog/add", authenticateToken, (req, res) => {
 app.post("/catalog/edit", authenticateToken, (req, res) => {
   pool.getConnection((err, connection) => {
     const data = req.body;
-    const replace = transform(data, [id]);
-    const sql = `UPDATE table_list SET ${replace} WHERE Id = ${data.id}`;
+    const replace = transform(data, ["Id"]);
+    const sql = `UPDATE table_list SET ${replace} WHERE Id = ${data.Id}`;
     connection.query(sql, (err, result) => {
       if (!err) {
         res.send(responseFormat());
