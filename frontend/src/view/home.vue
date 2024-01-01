@@ -6,16 +6,16 @@
     </el-col>
     <el-table :data="state.tableData" style="width: 100%;" size="small"
       :default-sort="{ prop: 'date', order: 'descending' }" :scrollbar-always-on="true">
-      <el-table-column prop="index" label="序号" width="50" fixed />
+      <el-table-column prop="Id" label="ID" width="50" fixed />
       <el-table-column prop="theme" label="主题" width="112" :show-overflow-tooltip="true" fixed />
-      <el-table-column prop="date" label="日期" width="90" sortable fixed />
+      <el-table-column prop="date" label="日期" width="90" fixed />
       <el-table-column prop="type" label="类型">
         <template #default="scope">
           {{ types[scope.row.type] }}
         </template>
       </el-table-column>
       <el-table-column prop="summary" label="概要" width="330" :show-overflow-tooltip="true" />
-      <el-table-column prop="star" label="干货" sortable align="center">
+      <el-table-column prop="star" label="干货" align="center">
         <template #default="scope">
           {{ scope.row.star ? scope.row.star + '星' : '' }}
         </template>
@@ -135,7 +135,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElTable,ElTableColumn,ElPagination,ElLink,ElButton, ElRow, ElCol, ElOption, ElSelect, ElInput, ElFormItem, ElForm, ElDialog,ElMessage, ElMessageBox  } from 'element-plus'
+import { ElTable, ElTableColumn, ElPagination, ElLink, ElButton, ElRow, ElCol, ElOption, ElSelect, ElInput, ElFormItem, ElForm, ElDialog, ElMessage, ElMessageBox } from 'element-plus'
 import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi } from '../api/home'
 const ups = [
   {
@@ -268,23 +268,16 @@ const jumpUrl = link => {
   window.open(link, '_blank')
 }
 const paginationChange = () => {
-  state.tableData = state.tableDataTemp.slice((query.pageIndex - 1) * query.pageSize, query.pageIndex * query.pageSize)
+  getCatalogList()
 }
 const getCatalogList = () => {
-  getCatalogListApi().then(({ data }) => {
-    const tableData = data
-    const len = tableData.length
-    tableData.sort((a, b) => {
-      const t1 = new Date(a.date).getTime()
-      const t2 = new Date(b.date).getTime()
-      return t2 - t1
-    })
-    tableData.forEach((item, index) => {
-      item.index = len - index
-    })
-    query.pageTotal = len
-    state.tableDataTemp = tableData
-    state.tableData = tableData.slice((query.pageIndex - 1) * query.pageSize, query.pageIndex * query.pageSize)
+  const params = {
+    pageSize: query.pageSize,
+    pageIndex: query.pageIndex
+  }
+  getCatalogListApi(params).then(({ data }) => {
+    query.pageTotal = data.total
+    state.tableData = data.list
   })
 }
 const init = () => {

@@ -141,14 +141,32 @@ app.get("/catalog/delete", authenticateToken, (req, res) => {
 
 // 莫大目录-获取
 app.get("/catalog/list", (req, res) => {
+  const query = req.query;
+  if (Object.keys(query).length < 2) {
+    query.pageSize = "10";
+    query.pageIndex = "1";
+  }
   pool.getConnection((err, connection) => {
     if (err) {
       return res.send(responseFormat(502, [], "服务端故障"));
     }
-    const sql = "SELECT * FROM table_list";
+    const sql = `SELECT * FROM table_list  ORDER BY date DESC LIMIT ${
+      query.pageSize
+    } OFFSET ${(query.pageIndex - 1) * query.pageSize};`;
+    const sql_count = `SELECT COUNT(*) FROM table_list;`;
     connection.query(sql, (err, result) => {
       if (!err) {
-        res.send(responseFormat(200, result));
+        const data = { list: result };
+        connection.query(sql_count, (err, result) => {
+          if (!err) {
+            data.total = result[0]["COUNT(*)"];
+            (data.pageSize = query.pageSize),
+              (data.pageIndex = query.pageIndex);
+            res.send(responseFormat(200, data));
+          } else {
+            res.send(responseFormat(409, [], err.sqlMessage));
+          }
+        });
       } else {
         res.send(responseFormat(409, [], err.sqlMessage));
       }

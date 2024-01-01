@@ -1,8 +1,8 @@
 import { request } from "../utils/request";
 
-export const getCatalogListApi = () => {
+export const getCatalogListApi = (params) => {
   const url = "/catalog/list";
-  return request.get(url);
+  return request.get(url, { params });
 };
 
 export const addCatalogApi = (data) => {
