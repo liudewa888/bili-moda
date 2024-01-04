@@ -17,5 +17,5 @@ export const editCatalogApi = (data) => {
 
 export const deleteCatalogApi = (params) => {
   const url = "/catalog/delete";
-  return request.get(url, {}, { params });
+  return request.get(url, { params });
 };

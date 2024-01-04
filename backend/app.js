@@ -223,3 +223,8 @@ app.get("/test", authenticateToken, (req, res) => {
 app.listen(9080, () => {
   console.log("9080 is running");
 });
+
+// 服务器写法
+// app.listen(process.env.PORT,function() {
+//   console.log(process.env.PORT ,"is running");
+// })

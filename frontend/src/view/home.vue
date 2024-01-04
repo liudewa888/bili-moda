@@ -1,7 +1,7 @@
 <template>
   <el-row class="web-main">
     <el-col class="head">
-      <h2 style="margin-bottom: 10px;">B站莫大视频收集汇总学习</h2>
+      <h2 style="margin-bottom: 10px;">莫大B站视频收集汇总学习</h2>
       <el-button type="primary" @click="tableOperateHandler('add')" v-if="tokenShow">添加</el-button>
     </el-col>
     <el-table :data="state.tableData" style="width: 100%;" size="small"
@@ -14,7 +14,16 @@
           {{ types[scope.row.type] }}
         </template>
       </el-table-column>
-      <el-table-column prop="summary" label="概要" width="330" :show-overflow-tooltip="true" />
+      <el-table-column prop="summary" label="概要" width="140">
+        <template #default="scope">
+          <el-tooltip placement="bottom" :raw-content="true">
+            <template #content>
+              <p class="mb-8" v-for="item in scope.row.summary">{{ item }}</p>
+            </template>
+            <span class="over" v-if="scope.row.summary.length">{{ scope.row.summary[0] }}...</span>
+          </el-tooltip>
+        </template>
+      </el-table-column>
       <el-table-column prop="star" label="干货" align="center">
         <template #default="scope">
           {{ scope.row.star ? scope.row.star + '星' : '' }}
@@ -56,21 +65,28 @@
           <el-button link type="primary" size="small" @click.prevent="tableOperateHandler('edit', scope.row)">
             编辑
           </el-button>
-          <el-button link type="primary" size="small" @click.prevent="tableOperateHandler('delete', scope.row)">
-            删除
-          </el-button>
+          <el-popconfirm @confirm="tableOperateHandler('delete', scope.row)" title="确认删除?">
+            <template #reference>
+              <el-button link type="primary" size="small">
+                删除
+              </el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
     <div class="pagination mt-4">
-      <el-pagination small background layout="prev, pager, next" v-model:current-page="query.pageIndex"
-        :page-sizes="query.pageSize" :total="query.pageTotal" @current-change="paginationChange" />
+      <el-config-provider :locale="zhCn">
+        <el-pagination small background layout="total,prev, pager, next" v-model:current-page="query.pageIndex"
+          :page-sizes="query.pageSize" :total="query.pageTotal" @current-change="paginationChange" />
+      </el-config-provider>
     </div>
     <div class="footer">
       <h3 style="margin: 10px 0">备注</h3>
       <ul>
         <li>1. 由于莫大直播录播有概率被掐,收集莫大全部视频地址进行复盘学习</li>
-        <li>2. 网页地址会放到B站动态</li>
+        <li>2. 网页地址会放到B站动态<el-link type="primary" size="small" href="https://t.bilibili.com/881548479975915570"
+            target="_blank" :underline="false" style="font-size: 12px;">地址</el-link></li>
         <li>3. 主要是概要比较难总结,大家看过视频多多进行总结并提供</li>
         <li>4. 欢迎大家在B站评论区按照格式进行补充和修改</li>
         <li>5. 感谢有过录屏的up主
@@ -96,7 +112,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="概要" prop="summary">
-          <el-input v-model="catalogFormData.summary" />
+          <el-input v-model="catalogFormData.summary" type="textarea" resize="none" :input-style="{ height: '120px' }" @blur="textareaBlur"/>
         </el-form-item>
         <el-form-item label="干货星级" prop="star">
           <el-select v-model="catalogFormData.star" placeholder="请选择">
@@ -135,16 +151,25 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElTable, ElTableColumn, ElPagination, ElLink, ElButton, ElRow, ElCol, ElOption, ElSelect, ElInput, ElFormItem, ElForm, ElDialog, ElMessage, ElMessageBox } from 'element-plus'
+import { ElTooltip, ElTable, ElTableColumn, ElPagination, ElLink, ElButton, ElRow, ElCol, ElOption, ElSelect, ElInput, ElFormItem, ElForm, ElDialog, ElMessage, ElPopconfirm, ElConfigProvider } from 'element-plus'
 import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi } from '../api/home'
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
 const ups = [
+  {
+    name: '无畏的小老虎',
+    home: 'https://space.bilibili.com/482526479'
+  },
   {
     name: 'Tobea-better-man',
     home: 'https://space.bilibili.com/291104144'
   },
   {
-    name: '无畏的小老虎',
-    home: 'https://space.bilibili.com/482526479'
+    name: '赶紧飞起',
+    home: 'https://space.bilibili.com/487674409'
+  },
+  {
+    name: '知情潋滟丶',
+    home: 'https://space.bilibili.com/12486773'
   },
 ]
 const types = {
@@ -203,6 +228,11 @@ const state = reactive({
   tableData: [],
   tableDataTemp: []
 })
+const textareaBlur = ()=>{
+  if(catalogFormData.summary){
+    catalogFormData.summary = catalogFormData.summary.replace(/'/g, "\\'")
+  }
+}
 const formSubmitHandler = (flag) => {
   ElMessage({
     message: flag + '成功!',
@@ -230,6 +260,7 @@ const formSubmit = (formRef) => {
 }
 const resetForm = (formRef) => {
   if (!formRef) return;
+  catalogFormData.Id = null
   formRef.resetFields()
 }
 const dialogOpen = (formRef) => {
@@ -244,21 +275,9 @@ const tableOperateHandler = (flag, row) => {
     })
     catalogFormData.Id = row.Id
   } else if (flag === 'delete') {
-    ElMessageBox.confirm(
-      '请确认是否要删除?',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
-      .then(() => {
-        deleteCatalogApi({ id: row.id }).then(() => {
-          formSubmitHandler('删除')
-        })
-      })
-      .catch(() => {
-      })
+    deleteCatalogApi({ id: row.Id }).then(() => {
+      formSubmitHandler('删除')
+    })
     return
   }
   tableOperateFlag.value = flag
@@ -277,6 +296,13 @@ const getCatalogList = () => {
   }
   getCatalogListApi(params).then(({ data }) => {
     query.pageTotal = data.total
+    data.list.forEach(item => {
+      if (item.summary) {
+        item.summary = item.summary?.split('\n')
+      } else {
+        item.summary = []
+      }
+    })
     state.tableData = data.list
   })
 }
@@ -332,6 +358,13 @@ onMounted(() => {
     margin-top: 4px;
   }
 
+  .mb-4 {
+    margin-bottom: 4px;
+  }
+  .mb-8 {
+    margin-bottom: 8px;
+  }
+
   .mr-4 {
     margin-right: 4px;
   }
@@ -345,6 +378,12 @@ onMounted(() => {
   .head {
     display: flex;
     justify-content: space-between;
+  }
+
+  .over {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
   }
 }
 </style>
