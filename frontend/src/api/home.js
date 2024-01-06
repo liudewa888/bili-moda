@@ -19,3 +19,8 @@ export const deleteCatalogApi = (params) => {
   const url = "/catalog/delete";
   return request.get(url, { params });
 };
+
+export const getDynamicListApi = () => {
+  const url = "/dynamic/list";
+  return request.get(url);
+};

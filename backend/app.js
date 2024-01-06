@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql");
 const jwt = require("jsonwebtoken");
 const compression = require("compression");
+const axios = require("axios");
 const app = express();
 
 app.use((req, res, next) => {
@@ -16,7 +17,6 @@ app.use((req, res, next) => {
 app.use(express.static("./dist"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
 app.use(compression());
 
 const pool = mysql.createPool({
@@ -27,6 +27,7 @@ const pool = mysql.createPool({
   database: "moda",
   dateStrings: true,
 });
+
 // {age:18}转为'age=18'
 function transform(obj, filter = []) {
   if (!(obj && typeof obj === "object")) return "";
@@ -84,10 +85,61 @@ function authenticateToken(req, res, next) {
     });
   });
 }
+// 获取服务器时间戳
+async function getServerTimeSpan() {
+  const url =
+    "http://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp";
+  const { data } = await axios.get(url);
+  if (data.data) {
+    return data.data.t;
+  }
+}
 // 返回10位格式时间戳
 function getTimeSpan() {
   return String(parseInt(new Date().getTime() / 1000));
 }
+
+// 动态新增
+app.post("/dynamic/add", (req, res) => {
+  pool.getConnection(async (err, connection) => {
+    const body = req.body;
+    const data = {};
+    Object.keys(body).forEach((key) => {
+      if (body[key]) {
+        data[key] = `'${body[key]}'`;
+      }
+    });
+    data.time = await getServerTimeSpan();
+    const sql = `INSERT INTO dynamic (${Object.keys(
+      data
+    ).join()}) VALUES (${Object.values(data).join()})`;
+    connection.query(sql, (err, result) => {
+      if (!err) {
+        res.send(responseFormat());
+      } else {
+        res.send(responseFormat(409, [], err.sqlMessage));
+      }
+    });
+    connection.release();
+  });
+});
+// 动态获取
+app.get("/dynamic/list", (req, res) => {
+  pool.getConnection((err, connection) => {
+    if (err) {
+      return res.send(responseFormat(502, [], "服务端故障"));
+    }
+    const sql = `SELECT * FROM dynamic ORDER BY time DESC LIMIT 5;`;
+    connection.query(sql, (err, result) => {
+      if (!err) {
+        res.send(responseFormat(200, result));
+      } else {
+        res.send(responseFormat(409, [], err.sqlMessage));
+      }
+    });
+    connection.release();
+  });
+});
 
 // 登录
 app.post("/admin/login", (req, res) => {

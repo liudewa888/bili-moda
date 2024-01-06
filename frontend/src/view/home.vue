@@ -7,20 +7,20 @@
     <el-table :data="state.tableData" style="width: 100%;" size="small"
       :default-sort="{ prop: 'date', order: 'descending' }" :scrollbar-always-on="true">
       <el-table-column prop="Id" label="ID" width="50" fixed />
-      <el-table-column prop="theme" label="主题" width="112" :show-overflow-tooltip="true" fixed />
+      <el-table-column prop="theme" label="主题" width="120" :show-overflow-tooltip="true" fixed />
       <el-table-column prop="date" label="日期" width="90" fixed />
       <el-table-column prop="type" label="类型">
         <template #default="scope">
           {{ types[scope.row.type] }}
         </template>
       </el-table-column>
-      <el-table-column prop="summary" label="概要" width="140">
+      <el-table-column prop="summary" label="概要" width="160">
         <template #default="scope">
           <el-tooltip placement="bottom" :raw-content="true">
             <template #content>
-              <p class="mb-8" v-for="item in scope.row.summary">{{ item }}</p>
+              <p class="mb-8" v-for="(item, index) in scope.row.summary">{{ (index + 1) + '. ' + item }}</p>
             </template>
-            <span class="over" v-if="scope.row.summary.length">{{ scope.row.summary[0] }}...</span>
+            <span v-if="scope.row.summary.length">{{ scope.row.summary[0].slice(0, 10) }}...</span>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -96,6 +96,9 @@
           大家多多给一键三连
         </li>
       </ul>
+      <div class="dynamic">
+        <DynamicCard v-if="state.cardData.length" :data="state.cardData"></DynamicCard>
+      </div>
     </div>
     <el-dialog v-model="dialogShow" :title="tableOperateFlag == 'add' ? '添加' : '编辑'" width="60%" :show-close="false"
       @open="dialogOpen(dialogFormRef)">
@@ -112,7 +115,8 @@
           </el-select>
         </el-form-item>
         <el-form-item label="概要" prop="summary">
-          <el-input v-model="catalogFormData.summary" type="textarea" resize="none" :input-style="{ height: '120px' }" @blur="textareaBlur"/>
+          <el-input v-model="catalogFormData.summary" type="textarea" resize="none" :input-style="{ height: '120px' }"
+            @blur="textareaBlur" />
         </el-form-item>
         <el-form-item label="干货星级" prop="star">
           <el-select v-model="catalogFormData.star" placeholder="请选择">
@@ -152,8 +156,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElTooltip, ElTable, ElTableColumn, ElPagination, ElLink, ElButton, ElRow, ElCol, ElOption, ElSelect, ElInput, ElFormItem, ElForm, ElDialog, ElMessage, ElPopconfirm, ElConfigProvider } from 'element-plus'
-import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi } from '../api/home'
+import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi, getDynamicListApi } from '../api/home'
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
+import DynamicCard from '../components/DynamicCard.vue'
 const ups = [
   {
     name: '无畏的小老虎',
@@ -226,10 +231,11 @@ const query = reactive({
 })
 const state = reactive({
   tableData: [],
-  tableDataTemp: []
+  tableDataTemp: [],
+  cardData: []
 })
-const textareaBlur = ()=>{
-  if(catalogFormData.summary){
+const textareaBlur = () => {
+  if (catalogFormData.summary) {
     catalogFormData.summary = catalogFormData.summary.replace(/'/g, "\\'")
   }
 }
@@ -306,9 +312,15 @@ const getCatalogList = () => {
     state.tableData = data.list
   })
 }
+const getDynamicList = () => {
+  getDynamicListApi().then(({ data }) => {
+    state.cardData = data
+  })
+}
 const init = () => {
   getCatalogList()
   tokenShowHandler()
+  getDynamicList()
 }
 const tokenShowHandler = () => {
   const token = localStorage.getItem('token')
@@ -361,6 +373,7 @@ onMounted(() => {
   .mb-4 {
     margin-bottom: 4px;
   }
+
   .mb-8 {
     margin-bottom: 8px;
   }
@@ -380,10 +393,18 @@ onMounted(() => {
     justify-content: space-between;
   }
 
-  .over {
+  .ellipsis {
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap
+    width: 160px;
+  }
+
+  .dynamic {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    z-index: 2;
   }
 }
 </style>
