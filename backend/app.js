@@ -14,6 +14,19 @@ app.use((req, res, next) => {
   }
   next();
 });
+let sse = null
+// sse
+app.get("/dynamic/sse", (req, res) => {
+  res.set({
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Access-Control-Allow-Origin": "*",
+  });
+  res.flushHeaders();
+  sse = res
+});
+
 app.use(express.static("./dist"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -115,6 +128,7 @@ app.post("/dynamic/add", (req, res) => {
     ).join()}) VALUES (${Object.values(data).join()})`;
     connection.query(sql, (err, result) => {
       if (!err) {
+        sse.write("data: ok\n\n")
         res.send(responseFormat());
       } else {
         res.send(responseFormat(409, [], err.sqlMessage));
@@ -123,6 +137,7 @@ app.post("/dynamic/add", (req, res) => {
     connection.release();
   });
 });
+
 // 动态获取
 app.get("/dynamic/list", (req, res) => {
   pool.getConnection((err, connection) => {

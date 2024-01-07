@@ -6,7 +6,7 @@ const _import = (path) => {
 };
 
 const routes = [
-  { path: "/", component: _import("home") },
+  { path: "/", component: () => import('../view/Home.vue') },
   { path: "/admin/login", component: _import("login") },
 ];
 

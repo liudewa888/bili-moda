@@ -78,7 +78,7 @@
     <div class="pagination mt-4">
       <el-config-provider :locale="zhCn">
         <el-pagination small background layout="total,prev, pager, next" v-model:current-page="query.pageIndex"
-          :page-sizes="query.pageSize" :total="query.pageTotal" @current-change="paginationChange" />
+          :page-sizes="[10]" :total="query.pageTotal" @current-change="paginationChange" />
       </el-config-provider>
     </div>
     <div class="footer">
@@ -159,6 +159,21 @@ import { ElTooltip, ElTable, ElTableColumn, ElPagination, ElLink, ElButton, ElRo
 import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi, getDynamicListApi } from '../api/home'
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import DynamicCard from '../components/DynamicCard.vue'
+
+const source = new EventSource('./api/dynamic/sse')
+
+source.addEventListener('message', function (event) {
+  const data = event.data;
+  if(data === 'ok'){
+    getDynamicList()
+  }
+}, false);
+
+source.addEventListener('error', function (event) {
+  console.log('sse error');
+}, false);
+
+
 const ups = [
   {
     name: '无畏的小老虎',

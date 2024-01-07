@@ -14,7 +14,7 @@
         </div>
       </div>
     </el-col>
-    <el-col v-if="isShow">
+    <el-col class="scroll" v-if="isShow">
       <div class="card items-space" v-for="item in data">
         <div class="justify-space card-top">
           <span>{{ types[item.type] }}</span>
@@ -36,8 +36,8 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, defineProps, onMounted } from 'vue'
-import { ElRow, ElCol, ElLink, ElIcon } from 'element-plus'
+import { ref, defineProps, onMounted } from 'vue'
+import { ElCol, ElLink, ElIcon } from 'element-plus'
 
 import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
 const types = {
@@ -66,8 +66,9 @@ const showCard = () => {
 }
 const init = () => {
   data.forEach(item => {
-    item.ftime = new Date(Number(item.time)).toLocaleString()
-    item.isHot = hot(item.time)
+    const t = item.time || item.ctime.padEnd(13,'0')
+    item.ftime = new Date(Number(t)).toLocaleString()
+    item.isHot = hot(t)
   })
 }
 onMounted(() => {
@@ -163,10 +164,15 @@ onMounted(() => {
     font-size: 12px;
     font-weight: 600;
   }
+
+  .scroll {
+    height: 250px;
+    overflow-y: scroll;
+  }
 }
 
 @media screen and (min-width: 900px) {
   .dynamic-card {
-    width: 280px;
+    width: 300px;
   }
 }</style>
