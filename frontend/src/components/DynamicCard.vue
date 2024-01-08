@@ -53,26 +53,12 @@ const { data } = defineProps({
   }
 })
 
-const hot = (time) => {
-  const currTime = new Date().getTime();
-  if (currTime - time < 60 * 60 * 1000) {
-    return true
-  }
-  return false
-}
 const isShow = ref(true)
 const showCard = () => {
   isShow.value = !isShow.value
 }
-const init = () => {
-  data.forEach(item => {
-    const t = item.time || item.ctime.padEnd(13,'0')
-    item.ftime = new Date(Number(t)).toLocaleString()
-    item.isHot = hot(t)
-  })
-}
 onMounted(() => {
-  init()
+
 })
 </script>
 <style scoped lang="less">

@@ -14,7 +14,7 @@ app.use((req, res, next) => {
   }
   next();
 });
-let sse = null
+const sse = [];
 // sse
 app.get("/dynamic/sse", (req, res) => {
   res.set({
@@ -24,7 +24,14 @@ app.get("/dynamic/sse", (req, res) => {
     "Access-Control-Allow-Origin": "*",
   });
   res.flushHeaders();
-  sse = res
+  res.write("data: sse connected\n\n");
+  if (sse.length > 50) {
+    sse.shift();
+  }
+  sse.push(res);
+  setInterval(function () {
+    res.write("data: heart beat\n\n");
+  }, 1000 * 60 * 20);
 });
 
 app.use(express.static("./dist"));
@@ -128,7 +135,9 @@ app.post("/dynamic/add", (req, res) => {
     ).join()}) VALUES (${Object.values(data).join()})`;
     connection.query(sql, (err, result) => {
       if (!err) {
-        sse.write("data: ok\n\n")
+        sse.forEach((resp) => {
+          resp.write("data: ok\n\n");
+        });
         res.send(responseFormat());
       } else {
         res.send(responseFormat(409, [], err.sqlMessage));

@@ -78,7 +78,7 @@
     <div class="pagination mt-4">
       <el-config-provider :locale="zhCn">
         <el-pagination small background layout="total,prev, pager, next" v-model:current-page="query.pageIndex"
-          :page-sizes="[10]" :total="query.pageTotal" @current-change="paginationChange" />
+          :page-size="query.pageSize" :total="query.pageTotal" @current-change="paginationChange" />
       </el-config-provider>
     </div>
     <div class="footer">
@@ -160,11 +160,12 @@ import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi, get
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import DynamicCard from '../components/DynamicCard.vue'
 
+// const source = new EventSource('./api/dynamic/sse')
 const source = new EventSource('./api/dynamic/sse')
 
 source.addEventListener('message', function (event) {
   const data = event.data;
-  if(data === 'ok'){
+  if (data === 'ok') {
     getDynamicList()
   }
 }, false);
@@ -327,8 +328,20 @@ const getCatalogList = () => {
     state.tableData = data.list
   })
 }
+const hot = (time) => {
+  const currTime = new Date().getTime();
+  if (currTime - time < 60 * 60 * 1000) {
+    return true
+  }
+  return false
+}
 const getDynamicList = () => {
   getDynamicListApi().then(({ data }) => {
+    data.forEach(item => {
+      const t = item.time || item.ctime.padEnd(13, '0')
+      item.ftime = new Date(Number(t)).toLocaleString()
+      item.isHot = hot(t)
+    })
     state.cardData = data
   })
 }
