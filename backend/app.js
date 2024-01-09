@@ -25,7 +25,7 @@ app.get("/dynamic/sse", (req, res) => {
   });
   res.flushHeaders();
   res.write("data: sse connected\n\n");
-  if (sse.length > 50) {
+  if (sse.length > 500) {
     sse.shift();
   }
   sse.push(res);

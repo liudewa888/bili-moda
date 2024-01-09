@@ -85,7 +85,7 @@
       <h3 style="margin: 10px 0">备注</h3>
       <ul>
         <li>1. 由于莫大直播录播有概率被掐,收集莫大全部视频地址进行复盘学习</li>
-        <li>2. 网页地址会放到B站动态<el-link type="primary" size="small" href="https://t.bilibili.com/881548479975915570"
+        <li>2. 网页地址会放到B站动态,请收藏 <el-link type="primary" size="small" href="https://t.bilibili.com/881548479975915570"
             target="_blank" :underline="false" style="font-size: 12px;">地址</el-link></li>
         <li>3. 主要是概要比较难总结,大家看过视频多多进行总结并提供</li>
         <li>4. 欢迎大家在B站评论区按照格式进行补充和修改</li>
@@ -159,6 +159,7 @@ import { ElTooltip, ElTable, ElTableColumn, ElPagination, ElLink, ElButton, ElRo
 import { getCatalogListApi, addCatalogApi, editCatalogApi, deleteCatalogApi, getDynamicListApi } from '../api/home'
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import DynamicCard from '../components/DynamicCard.vue'
+import { notifyTitle, notifyWindow } from '../assets/js/notify'
 
 // const source = new EventSource('./api/dynamic/sse')
 const source = new EventSource('./api/dynamic/sse')
@@ -167,6 +168,8 @@ source.addEventListener('message', function (event) {
   const data = event.data;
   if (data === 'ok') {
     getDynamicList()
+    notifyTitle()
+    notifyWindow()
   }
 }, false);
 
