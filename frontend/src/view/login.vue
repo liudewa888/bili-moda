@@ -21,6 +21,9 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElButton, ElRow, ElCol, ElInput, ElFormItem, ElForm, ElMessage } from 'element-plus'
 import { toLoginApi } from "../api/login";
+import { MD5 } from '../assets/js/md5.min.js'
+
+const salt = 'moda'
 const router = useRouter()
 const rules = reactive({
   uname: [
@@ -43,6 +46,9 @@ const loginFormData = reactive({
   uname: null,
   password: null
 })
+const pswHandler = (psw) => {
+  return MD5(psw + salt)
+}
 const resetForm = (formRef) => {
   if (!formRef) return;
   formRef.resetFields()
@@ -52,7 +58,11 @@ const submitForm = (formRef) => {
   if (!formRef) return;
   formRef.validate((valid) => {
     if (valid) {
-      toLoginApi(loginFormData).then(({ data }) => {
+      const formData = {
+        uname: loginFormData.uname,
+        password: pswHandler(loginFormData.password)
+      }
+      toLoginApi(formData).then(({ data }) => {
         localStorage.setItem('token', data.token)
         ElMessage({
           message: '登录成功!',

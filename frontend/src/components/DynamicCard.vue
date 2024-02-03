@@ -36,7 +36,7 @@
   </div>
 </template>
 <script setup>
-import { ref, defineProps, onMounted } from 'vue'
+import { ref, defineProps } from 'vue'
 import { ElCol, ElLink, ElIcon } from 'element-plus'
 
 import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
@@ -57,14 +57,11 @@ const isShow = ref(true)
 const showCard = () => {
   isShow.value = !isShow.value
 }
-onMounted(() => {
-
-})
 </script>
 <style scoped lang="less">
 .dynamic-card {
   background-color: #e0e0c4;
-  width: 98vw;
+  width: 100%;
   border: 2px solid rgba(32, 32, 32, 0.3);
   box-shadow: 0px 4px 8px 4px rgba(32, 32, 32, 0.4);
   padding: 4px 2px;
@@ -161,4 +158,5 @@ onMounted(() => {
   .dynamic-card {
     width: 300px;
   }
-}</style>
+}
+</style>

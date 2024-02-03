@@ -18,9 +18,9 @@
         <template #default="scope">
           <el-tooltip placement="bottom" :raw-content="true">
             <template #content>
-              <p class="mb-8" v-for="(item, index) in scope.row.summary">{{ (index + 1) + '. ' + item }}</p>
+              <p class="mb-8" v-for="(item, index) in scope.row.summarys">{{ (index + 1) + '. ' + item }}</p>
             </template>
-            <span v-if="scope.row.summary.length">{{ scope.row.summary[0].slice(0, 10) }}...</span>
+            <span v-if="scope.row.summarys.length">{{ scope.row.summarys[0].slice(0, 10) }}...</span>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -62,7 +62,7 @@
       </el-table-column>
       <el-table-column label="操作" width="100" v-if="tokenShow">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click.prevent="tableOperateHandler('edit', scope.row)">
+          <el-button link type="primary" size="small" @click="tableOperateHandler('edit', scope.row)">
             编辑
           </el-button>
           <el-popconfirm @confirm="tableOperateHandler('delete', scope.row)" title="确认删除?">
@@ -254,8 +254,9 @@ const state = reactive({
   cardData: []
 })
 const textareaBlur = () => {
-  if (catalogFormData.summary) {
-    catalogFormData.summary = catalogFormData.summary.replace(/'/g, "\\'")
+  const summary = catalogFormData.summary
+  if (summary && summary.includes("'")) {
+    catalogFormData.summary = summary.replace(/'/g, "\\'")
   }
 }
 const formSubmitHandler = (flag) => {
@@ -323,9 +324,9 @@ const getCatalogList = () => {
     query.pageTotal = data.total
     data.list.forEach(item => {
       if (item.summary) {
-        item.summary = item.summary?.split('\n')
+        item.summarys = item.summary?.split('\n')
       } else {
-        item.summary = []
+        item.summarys = []
       }
     })
     state.tableData = data.list
@@ -367,7 +368,7 @@ onMounted(() => {
 <style scoped lang="less">
 .web-main {
   --el-bg-color: #c2c2a4;
-  --el-fill-color-light: #c2c2a4;
+  --el-fill-color-light: #9b9b7d;
   min-height: 100vh;
   padding: 0.5rem;
   flex-direction: column;

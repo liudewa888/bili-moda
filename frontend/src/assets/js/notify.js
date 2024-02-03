@@ -1,12 +1,12 @@
-let isShine = true;
+let isShine = false;
 export function notifyTitle() {
   const titleInit = document.title;
   let timerId = null;
   if (timerId) return;
   timerId = setInterval(function () {
-    let title = document.title;
-    if (isShine == true) {
-      if (/新/.test(title) == false) {
+    const title = document.title;
+    if (isShine) {
+      if (!/新/.test(title)) {
         document.title = "【您有新消息】";
       } else {
         document.title = "【　　　　　】";
@@ -32,10 +32,10 @@ export function notifyWindow() {
     Notification.requestPermission();
   }
   if (Notification.permission == "granted") {
-    new Notification('来消息了', {
-      body: '莫大有一条新动态,请前往查看! ',
+    new Notification("来消息了", {
+      body: "莫大有一条新动态,请前往查看! ",
       silent: true,
-      requireInteraction: true
+      requireInteraction: true,
     });
   }
 }
