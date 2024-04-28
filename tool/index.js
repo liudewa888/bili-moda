@@ -3,10 +3,10 @@ const mysql = require("mysql");
 const { tableData } = require("./public/table");
 
 const pool = mysql.createPool({
-  host: "82.157.150.181",
-  user: "user",
-  password: "useruser",
-  port: 3306,
+  host: "",
+  user: "",
+  password: "",
+  port: 2301,
   database: "moda",
   dateStrings: true,
 });
@@ -27,9 +27,9 @@ function addCatalog(temp) {
         console.log(err);
       } else {
         console.log("add success!");
-        i++
-        if(i>=len){
-          console.log('finished');
+        i++;
+        if (i >= len) {
+          console.log("finished");
         }
       }
     });
@@ -37,8 +37,8 @@ function addCatalog(temp) {
   });
 }
 
-const len = tableData.length
-let i  = 0 
+const len = tableData.length;
+let i = 0;
 function main() {
   tableData.forEach((data) => {
     addCatalog(data);
