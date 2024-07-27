@@ -23,7 +23,6 @@ import { ElButton, ElRow, ElCol, ElInput, ElFormItem, ElForm, ElMessage } from '
 import { toLoginApi } from "../api/login";
 import { MD5 } from '../assets/js/md5.min.js'
 
-const salt = 'moda'
 const router = useRouter()
 const rules = reactive({
   uname: [
@@ -47,7 +46,7 @@ const loginFormData = reactive({
   password: null
 })
 const pswHandler = (psw) => {
-  return MD5(psw + salt)
+  return MD5(psw)
 }
 const resetForm = (formRef) => {
   if (!formRef) return;
