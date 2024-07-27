@@ -40,11 +40,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 
 const pool = mysql.createPool({
-  host: "82.157.150.181",
-  user: "user",
-  password: "useruser",
+  host: "",
+  user: "",
+  password: "",
   port: 3306,
-  database: "moda",
+  database: "",
   dateStrings: true,
 });
 
@@ -85,6 +85,7 @@ function authenticateToken(req, res, next) {
   pool.getConnection((err, connection) => {
     const sql = `select token_key from users WHERE token = '${token}'`;
     connection.query(sql, (err, result) => {
+      connection.release();
       if (!err && result.length) {
         const key = result[0].token_key;
         jwt.verify(token, key, (err, decoded) => {
@@ -134,6 +135,7 @@ app.post("/dynamic/add", (req, res) => {
       data
     ).join()}) VALUES (${Object.values(data).join()})`;
     connection.query(sql, (err, result) => {
+      connection.release();
       if (!err) {
         sse.forEach((resp) => {
           resp.write("data: ok\n\n");
@@ -143,7 +145,6 @@ app.post("/dynamic/add", (req, res) => {
         res.send(responseFormat(409, [], err.sqlMessage));
       }
     });
-    connection.release();
   });
 });
 
@@ -155,13 +156,13 @@ app.get("/dynamic/list", (req, res) => {
     }
     const sql = `SELECT * FROM dynamic ORDER BY time DESC LIMIT 5;`;
     connection.query(sql, (err, result) => {
+      connection.release();
       if (!err) {
         res.send(responseFormat(200, result));
       } else {
         res.send(responseFormat(409, [], err.sqlMessage));
       }
     });
-    connection.release();
   });
 });
 
@@ -174,16 +175,28 @@ app.post("/admin/login", (req, res) => {
       if (!err) {
         //若存在结果则表示登陆成功
         if (result[0]) {
-          const user = { uname: data.uname };
-          const key = data.uname + getTimeSpan();
-          const token = generateAccessToken(user, key);
-          sql = `UPDATE users SET token_key = '${key}', token='${token}' WHERE uname = '${data.uname}'`;
-          connection.query(sql, (err, result) => {
+          const user = result[0];
+          const userInfo = {};
+          jwt.verify(user.token, user.token_key, (err, decoded) => {
             if (!err) {
-              res.send(responseFormat(200, { token }));
-            } else {
-              res.send(responseFormat(409, [], err.sqlMessage));
+              const time = getTimeSpan();
+              if (time < decoded.exp) {
+                userInfo.token = user.token;
+                return res.send(responseFormat(200, userInfo));
+              }
             }
+            const key = data.uname + getTimeSpan();
+            const token = generateAccessToken({ uname: data.uname }, key);
+            sql = `UPDATE users SET token_key = '${key}', token='${token}' WHERE uname = '${data.uname}'`;
+            connection.query(sql, (err, result) => {
+              connection.release();
+              if (!err) {
+                userInfo.token = token;
+                res.send(responseFormat(200, userInfo));
+              } else {
+                res.send(responseFormat(409, [], err.sqlMessage));
+              }
+            });
           });
         } else {
           res.send(responseFormat(409, [], "用户名或密码错误"));
@@ -202,13 +215,13 @@ app.get("/catalog/delete", authenticateToken, (req, res) => {
     const sql = `DELETE FROM table_list WHERE Id = ${id}`;
     if (id > 0) {
       connection.query(sql, (err, result) => {
+        connection.release();
         if (!err) {
           res.send(responseFormat());
         } else {
           res.send(responseFormat(409, [], err.sqlMessage));
         }
       });
-      connection.release();
     } else {
       res.send(responseFormat(409, [], "参数错误"));
     }
@@ -231,6 +244,7 @@ app.get("/catalog/list", (req, res) => {
     } OFFSET ${(query.pageIndex - 1) * query.pageSize};`;
     const sql_count = `SELECT COUNT(*) FROM table_list;`;
     connection.query(sql, (err, result) => {
+      connection.release();
       if (!err) {
         const data = { list: result };
         connection.query(sql_count, (err, result) => {
@@ -247,7 +261,6 @@ app.get("/catalog/list", (req, res) => {
         res.send(responseFormat(409, [], err.sqlMessage));
       }
     });
-    connection.release();
   });
 });
 
@@ -265,13 +278,13 @@ app.post("/catalog/add", authenticateToken, (req, res) => {
       data
     ).join()}) VALUES (${Object.values(data).join()})`;
     connection.query(sql, (err, result) => {
+      connection.release();
       if (!err) {
         res.send(responseFormat());
       } else {
         res.send(responseFormat(409, [], err.sqlMessage));
       }
     });
-    connection.release();
   });
 });
 
@@ -282,13 +295,13 @@ app.post("/catalog/edit", authenticateToken, (req, res) => {
     const replace = transform(data, ["Id"]);
     const sql = `UPDATE table_list SET ${replace} WHERE Id = ${data.Id}`;
     connection.query(sql, (err, result) => {
+      connection.release();
       if (!err) {
         res.send(responseFormat());
       } else {
         res.send(responseFormat(409, [], err.sqlMessage));
       }
     });
-    connection.release();
   });
 });
 // 测试
