@@ -51,7 +51,7 @@ app.use(async (req, res, next) => {
     "/dynamic/add",
     "/catalog/list",
   ];
-  if (whiteList.includes(req.url)) {
+  if (whiteList.includes(req.path)) {
     next();
     return;
   }
@@ -90,12 +90,13 @@ function responseFormat(code = 200, data = [], msg = "ok") {
 
 // 获取服务器时间戳
 async function getServerTimeSpan() {
-  const url =
-    "http://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp";
-  const { data } = await axios.get(url);
-  if (data.data) {
-    return data.data.t;
-  }
+  // const url =
+  //   "http://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp";
+  // const { data } = await axios.get(url);
+  // if (data.data) {
+  //   return data.data.t;
+  // }
+  return +new Date();
 }
 
 // 动态新增
@@ -250,6 +251,6 @@ app.get("/test", (req, res) => {
 // });
 
 // 服务器写法
-app.listen(process.env.PORT,function() {
-  console.log(process.env.PORT ,"is running");
-})
+app.listen(process.env.PORT, function () {
+  console.log(process.env.PORT, "is running");
+});
