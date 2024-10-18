@@ -2,8 +2,12 @@
   <div class="dynamic-card">
     <el-col>
       <div class="title">
-        <h4 style="display: flex;align-items: center;">
-          <img src="../assets/img/notify.png" alt="" style="width: 20px;margin-right: 4px;">
+        <h4 style="display: flex; align-items: center">
+          <img
+            src="../assets/img/notify.png"
+            alt=""
+            style="width: 20px; margin-right: 4px"
+          />
           动态通知
         </h4>
         <div class="icon">
@@ -17,18 +21,32 @@
     <el-col class="scroll" v-if="isShow">
       <div class="card items-space" v-for="item in data">
         <div class="justify-space card-top">
-          <span>{{ types[item.type] }}</span>
+          <span>{{ item.name + types[item.type] }}</span>
           <span class="hot" v-if="item.isHot">new</span>
         </div>
         <div class="flex-1 content">
           <p>
-            {{ item.content }}...<span><el-link type="primary" :href="item.link" :underline="false" target="_blank"
-                style="font-size: 12px;">&gt&gt&gt详情</el-link></span>
+            {{ item.content }}...<span
+              ><el-link
+                type="primary"
+                :href="item.link"
+                :underline="false"
+                target="_blank"
+                style="font-size: 12px"
+                >&gt&gt&gt详情</el-link
+              ></span
+            >
           </p>
         </div>
         <div class="justify-space card-bottom">
-          <el-link type="primary" :href="item.link" :underline="false" target="_blank"
-            style="font-size: 12px;">直达链接</el-link>
+          <el-link
+            type="primary"
+            :href="item.link"
+            :underline="false"
+            target="_blank"
+            style="font-size: 12px"
+            >直达链接</el-link
+          >
           <span>{{ item.ftime }}</span>
         </div>
       </div>
@@ -36,32 +54,32 @@
   </div>
 </template>
 <script setup>
-import { ref, defineProps } from 'vue'
-import { ElCol, ElLink, ElIcon } from 'element-plus'
+import { ref, defineProps } from "vue";
+import { ElCol, ElLink, ElIcon } from "element-plus";
 
-import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
+import { ArrowUpBold, ArrowDownBold } from "@element-plus/icons-vue";
 const types = {
-  '1': '动态',
-  '2': '置顶',
-  '3': '直播',
-  '4': '其它'
-}
+  1: "动态",
+  2: "置顶",
+  3: "直播",
+  4: "其它",
+};
 const { data } = defineProps({
   data: {
     type: Array,
-    default: []
-  }
-})
+    default: [],
+  },
+});
 
-const isShow = ref(true)
+const isShow = ref(true);
 const showCard = () => {
-  isShow.value = !isShow.value
-}
+  isShow.value = !isShow.value;
+};
 </script>
 <style scoped lang="less">
 .dynamic-card {
   background-color: #e0e0c4;
-  width: 100%;
+  width: 100vw;
   border: 2px solid rgba(32, 32, 32, 0.3);
   box-shadow: 0px 4px 8px 4px rgba(32, 32, 32, 0.4);
   padding: 4px 2px;
@@ -149,14 +167,17 @@ const showCard = () => {
   }
 
   .scroll {
-    height: 250px;
+    height: 170px;
     overflow-y: scroll;
   }
 }
 
-@media screen and (min-width: 900px) {
+@media screen and (min-width: 768px) {
   .dynamic-card {
     width: 300px;
+    .scroll {
+      height: 250px;
+    }
   }
 }
 </style>
