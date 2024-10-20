@@ -440,7 +440,7 @@ const formSubmit = (formRef) => {
         addCatalogApi(catalogFormData).then(() => {
           formSubmitHandler("添加");
         });
-      } else if (tableOperateFlag.value === "edit") {
+      } else if (tableOperateFlag.value === "edit") {        
         editCatalogApi(catalogFormData).then(() => {
           formSubmitHandler("编辑");
         });
@@ -461,7 +461,7 @@ const dialogOpen = (formRef) => {
 const tableOperateHandler = (flag, row) => {
   if (flag === "edit") {
     Object.keys(catalogFormData).forEach((key) => {
-      catalogFormData[key] = row[key];
+      catalogFormData[key] = row[key] || '';
     });
     catalogFormData.Id = row.Id;
   } else if (flag === "delete") {
