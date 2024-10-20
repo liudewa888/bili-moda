@@ -400,13 +400,13 @@ const catalogFormData = reactive({
   date: null,
   theme: null,
   type: "1",
-  summary: null,
+  summary: '',
   star: "2",
   isComplete: "1",
   multiple: "0",
-  upVideo: null,
-  otherUpVideo: null,
-  audio: null,
+  upVideo: '',
+  otherUpVideo: '',
+  audio: '',
 });
 const query = reactive({
   pageIndex: 1,
