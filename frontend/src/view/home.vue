@@ -177,23 +177,19 @@
             >地址</el-link
           >
         </li>
-        <li>3. 主要是概要比较难总结,大家看过视频多多进行总结并提供</li>
-        <li>4. 欢迎大家在B站评论区按照格式进行补充和修改</li>
         <li>
-          5. 感谢有过录屏的up主
+          3. 网站地址要更换为,请收藏
           <el-link
-            class="mr-4"
             type="primary"
             size="small"
-            :href="item.home"
+            href="http://liudewa.cn"
             target="_blank"
             :underline="false"
-            v-for="item in ups"
             style="font-size: 12px"
-            >{{ item.name }}</el-link
+            >http://liudewa.cn</el-link
           >
-          大家多多给一键三连
         </li>
+        <li>4. 如有问题 请B站私信</li>
       </ul>
       <div class="dynamic">
         <DynamicCard

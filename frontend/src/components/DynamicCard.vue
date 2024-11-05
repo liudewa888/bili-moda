@@ -8,7 +8,7 @@
             alt=""
             style="width: 20px; margin-right: 4px"
           />
-          动态通知
+         <span style="font-size: 12px"> {{ notifyData }} </span>
         </h4>
         <div class="icon">
           <el-icon :size="20" color="#20202080" @click="showCard">
@@ -64,10 +64,14 @@ const types = {
   3: "直播",
   4: "其它",
 };
-const { data } = defineProps({
+const { data , notifyData } = defineProps({
   data: {
     type: Array,
     default: [],
+  },
+  notifyData: {
+    type: String,
+    default: '手机通知搜索钉钉群号: 101930003687 ',
   },
 });
 
